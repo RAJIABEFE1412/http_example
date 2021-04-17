@@ -1,16 +1,12 @@
-import 'dart:convert';
-import 'dart:developer';
+// Copyright (c) 2019, the Dart project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:http_example/photos.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-void main() {
-  runApp(MyApp());
-}
+
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -18,15 +14,15 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: 'Http example' + text),
+      home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
+
   final String title;
 
   @override
@@ -34,34 +30,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<Photos> lPhotos;
+  int _counter = 0;
 
-  bool loading;
-
-  @override
-  initState() {
-    super.initState();
-    lPhotos = [];
-    loading = true;
-    // _getImages().then((value) {
-    //   // log("the value gotten is ${value.statusCode}");
-
-    //   // log("images --  ${value.body}");
-    //   List a = json.decode(value.body);
-
-    //   if (mounted) {
-    //     setState(() => loading = false);
-    //   } else {
-    //     loading = false;
-    //   }
-    //   a.forEach((r) {
-    //     // log("each photos -- $r");
-    //     lPhotos.add(Photos.fromJson(r));
-    //   });
-    //   // log("our phots --- $lPhotos");
-    // }).catchError((e) {
-    //   log("error gotten was --- $e");
-    // });
+  void _incrementCounter() {
+    setState(() {
+      _counter++;
+    });
   }
 
   @override
@@ -69,69 +43,107 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        // titleSpacing: 0.0,
-        centerTitle: false,
       ),
-      body: Container(
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
-          child: FutureBuilder(
-              future: _getImages(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Container(
-                    height: 100,
-                    width: 100,
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  );
-                }
-
-                if (snapshot.hasError) {
-                  return Text("An error --- ${snapshot.error}");
-                }
-
-                if (snapshot.connectionState == ConnectionState.done &&
-                    snapshot.hasData) {
-                  log("snapshot -- ${snapshot.data.body}");
-                  var a = json.decode("${snapshot.data.body}");
-
-                  a.forEach((r) {
-                    log("each photos -- $r");
-                    lPhotos.add(Photos.fromJson(r));
-                  });
-                  return GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2),
-                    itemBuilder: (context, i) => Image.network(lPhotos[i].url),
-                    itemCount: lPhotos.length,
-                  );
-                }
-              })
-          // This trailing comma makes auto-formatting nicer for build methods.
+      body: Center(
+        child: Container(
+          height: 300,
+          width: 300,
+          child: Stack(
+            children: [
+              CustomPaint(
+                painter: ClockPainter(),
+                size: Size(300, 300),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Align(alignment: Alignment.topCenter, child: Text("12")),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child:
+                    Align(alignment: Alignment.bottomCenter, child: Text("6")),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Align(alignment: Alignment.centerLeft, child: Text("9")),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child:
+                    Align(alignment: Alignment.centerRight, child: Text("3")),
+              ),
+            ],
           ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: (){},
-            child: Icon(Icons.add),
-            backgroundColor: Colors.blue,
-          ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _incrementCounter,
+        tooltip: 'Increment',
+        child: Icon(Icons.add),
+      ),
     );
   }
-
-  Future<http.Response> _getImages() async {
-    Uri link = Uri.parse("https://jsonplaceholder.typicode.com/photos");
-    return http.get(link);
-  }
 }
-//  loading
-//               ? Container(
-//                   height: 100,
-//                   width: 100,
-//                   child: Center(child: CircularProgressIndicator()))
-//               : GridView.builder(
-//                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-//                       crossAxisCount: 2),
-//                   itemBuilder: (context, i) => Image.network(lPhotos[i].url),
-//                   itemCount: lPhotos.length,
-//                 )),
+
+class ClockPainter extends CustomPainter {
+  @override
+  void paint(canvas, size) {
+    Paint paint1 = Paint()
+      ..color = Color(0xffEE09EE)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.0;
+    canvas.drawCircle(
+      Offset(size.width * .5, size.height * .5),
+      size.width * .5,
+      paint1,
+    );
+
+    canvas.drawCircle(
+      Offset(
+        size.width * .5,
+        size.height * .5,
+      ),
+      size.width * .0155,
+      paint1..style = PaintingStyle.fill,
+    );
+// hour
+    canvas.drawLine(
+        Offset(
+          150,
+          142.5,
+        ),
+        Offset(
+          150,
+          90,
+        ),
+        paint1..strokeCap = StrokeCap.round);
+// for minutes
+    canvas.drawLine(
+        Offset(
+          158,
+          150.5,
+        ),
+        Offset(
+          230,
+          150,
+        ),
+        paint1..strokeCap = StrokeCap.round);
+    // seconds
+    canvas.drawLine(
+        Offset(
+          142,
+          148.5,
+        ),
+        Offset(
+          40,
+          120,
+        ),
+        paint1..strokeCap = StrokeCap.round);
+
+    // canvas.
+    return;
+  }
+
+  @override
+  bool shouldRepaint(ClockPainter c) => false;
+}
